@@ -1,0 +1,26 @@
+0. Synonyms
+    Find synonyms of `android', and add them to the search
+    condition tagged.
+1. Write results to csv files
+    1) Searched Items
+        Each worker with a csv file named Worker_{ID}.csv to 
+        store the searched items, including their id, title,
+        tag, score, link, from_date, to_date, nr_answer, 
+        accept_rate, ...
+    2) Configuration
+        Due to the throttle configured by StackExchange, we
+        cannot fetch all information once, i.e., we have to
+        fetch them several times.
+        To avoid redundancies, all workers should share one 
+        configuration file named configurations.properties,
+        to record their stop conditions (i.e., the concerned
+        restart conditions), including the page/item they 
+        stopped fetching at...
+2. Postprocess the files
+    1) Merging
+        When all works are completed (not died), merge all
+        csv files into one (it is okay whether to sort it via
+        score or not)
+    2) Analysing
+        Filter questions related to webview performance, and
+        read them, take notes

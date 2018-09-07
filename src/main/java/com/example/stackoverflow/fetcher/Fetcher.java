@@ -3,6 +3,8 @@ package com.example.stackoverflow.fetcher;
 import retrofit2.Response;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -12,114 +14,89 @@ public class Fetcher {
     public static class FetchResult {
         public int nrPage = 0;
         public int nrItem = 0;
-        public Response errorResponse = null;
+        public Map<Integer, Response> errorResponses = new HashMap<>();
     }
 
-    private static final int QUEUE_SIZE = 32;
+    private static final int NR_WORKER = 16;
 
     private Thread monitor;
     private final Object monitorLock = new Object();
 
-    private int nrWorker = QUEUE_SIZE;
-    private Lock nrWorkerLock = new ReentrantLock();
-    private int nrWaitedWorker = 0;
-    private Lock nrWaitedWorkerLock = new ReentrantLock();
-
-    private ExecutorService workers = Executors.newFixedThreadPool(QUEUE_SIZE);
-    private Object workersLock = new Object();
-    private BlockingQueue<Integer> queue = new LinkedBlockingQueue<>(QUEUE_SIZE);
+    private ExecutorService workers = Executors.newFixedThreadPool(NR_WORKER);
+    private int nrDiedWorker = 0;
+    private Lock nrDiedWorkerLock = new ReentrantLock();
+    private int nrCompletedWorker = 0;
+    private Lock nrCompletedWorkerLock = new ReentrantLock();
 
     private final FetchResult fetchResult = new FetchResult();
 
-    public Fetcher() {
-        try {
-            for (int i = 0; i < QUEUE_SIZE; i ++) {
-                // we assume that, the number of pages of searched results is at least 32 pages
-                queue.put(i + 1);
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            System.exit(1);
+    public class Worker implements Runnable {
+
+        private int workerId;
+
+        public Worker(int workerId) {
+            this.workerId = workerId;
         }
-    }
 
-    public void fetch() {
-        startMonitor();
-        StackOverflowClient client = StackOverflowClient.getClient();
-        StackOverflowService service = client.getStackOverflowService();
+        @Override
+        public void run() {
+            StackOverflowClient client = StackOverflowClient.getClient();
+            StackOverflowService service = client.getStackOverflowService();
 
-        for (int i = 0; i < QUEUE_SIZE; i ++) {
-            workers.submit(() -> {
-                while (true) {
-                    try {
-                        while (queue.peek() == null) {
-                            // ready to be into waited
-                            nrWaitedWorkerLock.lock();
-                            nrWaitedWorker ++;
-                            nrWaitedWorkerLock.unlock();
+            int page = workerId;
+            int step = NR_WORKER;
 
-                            // notify the monitor
-                            synchronized (monitorLock) {
-                                monitorLock.notify();
-                            }
-
-                            // wait
-                            synchronized (workersLock) {
-                                workersLock.wait();
-                            }
-
-                            // when notified, it is no longer a waited one
-                            nrWaitedWorkerLock.lock();
-                            nrWaitedWorker --;
-                            nrWaitedWorkerLock.unlock();
+            while (true) {
+                try {
+                    Response<SearchResult> response = service.search(page, "android").execute();
+                    if (response.isSuccessful()) {
+                        SearchResult result = response.body();
+                        System.out.println(String.format("Worker %d, page: %d, item: %d",
+                                workerId, page, result.getItems().size()));
+                        synchronized (fetchResult) {
+                            fetchResult.nrPage += 1;
+                            fetchResult.nrItem += result.getItems().size();
                         }
 
-                        int page = queue.take();
-                        Response<SearchResult> response = service.search(page, "android").execute();
-                        if (response.isSuccessful()) {
-                            SearchResult result = response.body();
-                            System.out.println(String.format("thread: %d, page: %d, item: %d",
-                                    Thread.currentThread().getId(), page, result.getItems().size()));
-                            if (result.isHasMore() & page >= QUEUE_SIZE) {
-                                synchronized (fetchResult) {
-                                    fetchResult.nrPage += 1;
-                                    fetchResult.nrItem += result.getItems().size();
-                                }
-                                queue.put(page + 1);
+                        if (!result.isHasMore()) {
+                            System.out.println(String.format(
+                                    "Worker %d have completed work", workerId));
 
-                                synchronized (workersLock) {
-                                    workersLock.notifyAll();
-                                }
-                            }
-                        } else {
-                            // page is too large, this can only happen when page <= QUEUE_SIZE,
-                            // if no network errors and throttle
-                            synchronized (fetchResult) {
-                                fetchResult.errorResponse = response;
-                            }
-
-                            // a worker died
-                            nrWorkerLock.lock();
-                            nrWorker --;
-                            nrWorkerLock.unlock();
-
-                            // awake the monitor
+                            nrCompletedWorkerLock.lock();
+                            nrCompletedWorker ++;
+                            nrCompletedWorkerLock.unlock();
+                            // notify monitor
                             synchronized (monitorLock) {
                                 monitorLock.notify();
                             }
 
                             // exit
                             break;
+                        } else {
+                            page += step;
                         }
-                    } catch (InterruptedException e) {
-                        System.out.println("THREAD INTERRUPTED");
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        System.out.println("NETWORK FAILED");
-                        e.printStackTrace();
+                    } else {
+                        System.out.println(String.format(
+                                "Worker %d have encountered error", workerId));
+
+                        nrDiedWorkerLock.lock();
+                        nrDiedWorker ++;
+                        nrDiedWorkerLock.unlock();
+                        synchronized (fetchResult) {
+                            fetchResult.errorResponses.put(workerId, response);
+                        }
+                        // notify monitor
+                        synchronized (monitorLock) {
+                            monitorLock.notify();
+                        }
+
+                        // exit
+                        break;
                     }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            });
+            }
         }
     }
 
@@ -134,28 +111,43 @@ public class Fetcher {
                         monitorLock.wait();
                     }
 
-                    if (nrWorker == nrWaitedWorker) {
+                    if (nrCompletedWorker + nrDiedWorker == NR_WORKER) {
+                        long endTime = System.currentTimeMillis();
                         workers.shutdownNow();
-                        if (fetchResult.errorResponse == null) {
-                            long endTime = System.currentTimeMillis();
+                        if (nrDiedWorker == 0) {
                             System.out.println("Succeeded, the results:");
-                            System.out.println(" - used time: " + ((endTime - startTime) / 1000) + "s");
-                            System.out.println(" - total pages: " + fetchResult.nrPage);
-                            System.out.println(" - total items: " + fetchResult.nrItem);
+                            System.out.println("  - used time: " + ((double)(endTime - startTime) / 1000) + "s");
+                            System.out.println("  - total pages: " + fetchResult.nrPage);
+                            System.out.println("  - total items: " + fetchResult.nrItem);
                         } else {
-                            System.out.println("Failed, server responses with:");
-                            System.out.println(" - code: " + fetchResult.errorResponse.code());
-                            System.out.println(" - message: " + fetchResult.errorResponse.message());
-                            System.out.println(" - toString: " + fetchResult.errorResponse.toString());
+                            System.out.println("Failed, the results:");
+                            System.out.println("  - used time: " + ((double)(endTime - startTime) / 1000) + "s");
+                            System.out.println("  - total pages: " + fetchResult.nrPage);
+                            System.out.println("  - total items: " + fetchResult.nrItem);
+                            for (Map.Entry<Integer, Response> entry : fetchResult.errorResponses.entrySet()) {
+                                System.out.println("  - worker: " + entry.getKey());
+                                System.out.println("    - code: " + entry.getValue().code());
+                                System.out.println("    - message: " + entry.getValue().message());
+                                System.out.println("    - toString: " + entry.getValue().toString());
+                            }
                         }
                         break;
                     }
                 } while (true);
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         });
         monitor.start();
+    }
+
+    public Fetcher() {}
+
+    public void fetch() {
+        startMonitor();
+        for (int i = 0; i < NR_WORKER; i++) {
+            workers.submit(new Worker(i + 1));
+        }
     }
 
     public static void main(String[] args) {
