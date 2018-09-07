@@ -4,10 +4,10 @@ import retrofit2.Call;
 
 public class StackOverflowService {
 
-    private static final String SITE = "stackoverflow";
-    private static final int PAGESIZE = 30;
-    private static final String SORT = "votes";
-    private static final String ORDER = "desc";
+    public static final String SITE = "stackoverflow";
+    public static final int PAGESIZE = 30;
+    public static final String SORT = "votes";
+    public static final String ORDER = "desc";
 
     // the raw StackExchangeService
     private StackExchangeService stackExchangeService;
