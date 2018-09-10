@@ -19,6 +19,11 @@ public class Fetcher {
         public Map<Integer, Response> errorResponses = new HashMap<>();
     }
 
+    static {
+        // initialize AppenderFactory
+        AppenderFactory.initialize();
+    }
+
     private Logger logger = LoggerFactory.getLogger(Fetcher.class);
 
     private Thread mMonitor;
@@ -31,6 +36,7 @@ public class Fetcher {
     private int mNrCompletedWorker = 0;
     private Lock mNrCompletedWorkerLock = new ReentrantLock();
 
+    private String[] mTags;
     private final FetcherConfig mConfig = new FetcherConfig("fetcherconfig.properties");
     private final FetcherResult mFetcherResult = new FetcherResult();
 
@@ -46,18 +52,23 @@ public class Fetcher {
         public void run() {
             StackOverflowClient client = StackOverflowClient.getClient();
             StackOverflowService service = client.getStackOverflowService();
+            Appender appender = AppenderFactory.getAppender(
+                    mConfig.getWorkerAppenderType(mWorkerId),
+                    mConfig.getWorkerAppenderPath(mWorkerId));
 
             int page = mConfig.getWorkerPage(mWorkerId);
             int step = mConfig.getWorkerStep(mWorkerId);
 
             while (true) {
                 try {
-                    Response<SearchResult> response = service.search(page, "android").execute();
+                    Response<SearchResult> response = service.search(page, mTags).execute();
                     if (response.isSuccessful()) {
                         SearchResult result = response.body();
                         logger.info(String.format("Worker %d, page: %d, item: %d",
                                 mWorkerId, page, result.getItems().size()));
 
+                        // handle result & update mFetchResult
+                        appender.append(result);
                         synchronized (mFetcherResult) {
                             mFetcherResult.nrPage += 1;
                             mFetcherResult.nrItem += result.getItems().size();
@@ -67,7 +78,7 @@ public class Fetcher {
                             logger.info(String.format(
                                     "Worker %d have completed work", mWorkerId));
 
-                            // save results
+                            // save results, next time from page+step
                             mConfig.setWorkerId(mWorkerId);
                             mConfig.setWorkerPage(mWorkerId, page + step);
                             mConfig.setWorkerStep(mWorkerId, step);
@@ -80,6 +91,9 @@ public class Fetcher {
                                 mMonitorLock.notify();
                             }
 
+                            // close appender
+                            appender.close();
+
                             // exit
                             break;
                         } else {
@@ -89,9 +103,9 @@ public class Fetcher {
                         logger.info(String.format(
                                 "Worker %d have encountered error", mWorkerId));
 
-                        // save results
+                        // save results, next time from page
                         mConfig.setWorkerId(mWorkerId);
-                        mConfig.setWorkerPage(mWorkerId, page + step);
+                        mConfig.setWorkerPage(mWorkerId, page);
                         mConfig.setWorkerStep(mWorkerId, step);
 
                         mNrDiedWorkerLock.lock();
@@ -105,6 +119,9 @@ public class Fetcher {
                             mMonitorLock.notify();
                         }
 
+                        // close appender
+                        appender.close();
+
                         // exit
                         break;
                     }
@@ -116,7 +133,9 @@ public class Fetcher {
         }
     }
 
-    public Fetcher() {}
+    public Fetcher(String[] tags) {
+        this.mTags = tags;
+    }
 
     public void fetch() {
         tryRestart();
@@ -202,6 +221,6 @@ public class Fetcher {
     }
 
     public static void main(String[] args) {
-        new Fetcher().fetch();
+        new Fetcher(new String[]{ "android" }).fetch();
     }
 }
