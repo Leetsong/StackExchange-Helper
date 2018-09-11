@@ -59,7 +59,11 @@ public class CsvAppender extends AbstractAppender {
 
         try {
             FileWriter fileWriter = new FileWriter(path, true);
-            csvWriter = new CSVWriter(fileWriter);
+            csvWriter = new CSVWriter(fileWriter,
+                    CSVWriter.DEFAULT_SEPARATOR,
+                    CSVWriter.NO_QUOTE_CHARACTER,
+                    CSVWriter.NO_ESCAPE_CHARACTER,
+                    CSVWriter.DEFAULT_LINE_END);
             if (!fileExists) {
                 // file is newly created, write the header
                 csvWriter.writeNext(CSV_HEADER);
