@@ -76,7 +76,7 @@ public class Fetcher {
 
                         if (!result.isHasMore()) {
                             logger.info(String.format(
-                                    "Worker %d have completed work", mWorkerId));
+                                    "Worker %d has completed work", mWorkerId));
 
                             // save results, next time from page+step
                             mConfig.setWorkerId(mWorkerId);
@@ -101,7 +101,7 @@ public class Fetcher {
                         }
                     } else {
                         logger.info(String.format(
-                                "Worker %d have encountered error", mWorkerId));
+                                "Worker %d has encountered error", mWorkerId));
 
                         // save results, next time from page
                         mConfig.setWorkerId(mWorkerId);
@@ -171,9 +171,8 @@ public class Fetcher {
     private void startMonitor() {
         mMonitor = new Thread(() -> {
             try {
+                long startTime = System.currentTimeMillis();
                 do {
-                    long startTime = System.currentTimeMillis();
-
                     // wait until others notify
                     synchronized (mMonitorLock) {
                         mMonitorLock.wait();
@@ -193,12 +192,12 @@ public class Fetcher {
                         // output result
                         if (mNrDiedWorker == 0) {
                             logger.info("Succeeded, the results:");
-                            logger.info("  - used time: " + ((double)(endTime - startTime) / 1000) + "s");
+                            logger.info("  - used time: " + Utility.timeInterval(startTime, endTime));
                             logger.info("  - total pages: " + mFetcherResult.nrPage);
                             logger.info("  - total items: " + mFetcherResult.nrItem);
                         } else {
                             logger.info("Failed, the results:");
-                            logger.info("  - used time: " + ((double)(endTime - startTime) / 1000) + "s");
+                            logger.info("  - used time: " + Utility.timeInterval(startTime, endTime));
                             logger.info("  - total pages: " + mFetcherResult.nrPage);
                             logger.info("  - total items: " + mFetcherResult.nrItem);
                             for (Map.Entry<Integer, Response> entry : mFetcherResult.errorResponses.entrySet()) {

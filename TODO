@@ -1,6 +1,18 @@
 0. Synonyms
     Find synonyms of `android', and add them to the search
     condition tagged.
+2. Postprocess the files
+    1) Merging
+        When all works are completed (not died), merge all
+        csv files into one (it is okay whether to sort it via
+        score or not)
+    2) Analysing
+        Filter questions related to webview performance, and
+        read them, take notes
+======
+0. Synonyms
+    Find synonyms of `android', and add them to the search
+    condition tagged.
 1. Write results to csv files
     Searched Items
         Each worker with a csv file named Worker_{ID}.csv to
