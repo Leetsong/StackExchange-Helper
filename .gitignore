@@ -2,4 +2,4 @@
 target
 *.csv
 fetcherconfig.properties
-.seh
+*.seh
