@@ -14,7 +14,7 @@ public class CsvAppender extends AbstractAppender {
     private Logger logger = LoggerFactory.getLogger(CsvAppender.class);
 
     // header of the csv file
-    private static final String[] CSV_HEADER = new String[] {
+    public static final String[] CSV_HEADER = new String[] {
             "ID", "Title", "Tags", "View Count", "Score", "Creation Date", "Link"
     };
 
@@ -59,11 +59,12 @@ public class CsvAppender extends AbstractAppender {
 
         try {
             FileWriter fileWriter = new FileWriter(path, true);
+            // use ',' as separator, '"' as quote, and '\\' as escape
+            // because CSVReader uses '\\' as default escape,
+            // However, CSVWriter uses '"' as default escape
+            // Wired!!!
             csvWriter = new CSVWriter(fileWriter,
-                    CSVWriter.DEFAULT_SEPARATOR,
-                    CSVWriter.NO_QUOTE_CHARACTER,
-                    CSVWriter.NO_ESCAPE_CHARACTER,
-                    CSVWriter.DEFAULT_LINE_END);
+                    ',', '"', '\\', "\n");
             if (!fileExists) {
                 // file is newly created, write the header
                 csvWriter.writeNext(CSV_HEADER);
