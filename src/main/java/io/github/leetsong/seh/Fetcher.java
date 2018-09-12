@@ -37,8 +37,8 @@ public class Fetcher {
     private Lock mNrCompletedWorkerLock = new ReentrantLock();
 
     private String[] mTags;
-    private final FetcherConfig mConfig = new FetcherConfig("fetcherconfig.properties");
-    private final FetcherResult mFetcherResult = new FetcherResult();
+    private final FetcherConfig mFetcherConfig;
+    private final FetcherResult mFetcherResult;
 
     public class Worker implements Runnable {
 
@@ -53,11 +53,11 @@ public class Fetcher {
             StackOverflowClient client = StackOverflowClient.getClient();
             StackOverflowService service = client.getStackOverflowService();
             Appender appender = AppenderFactory.getAppender(
-                    mConfig.getWorkerAppenderType(mWorkerId),
-                    mConfig.getWorkerAppenderPath(mWorkerId));
+                    mFetcherConfig.getWorkerAppenderType(mWorkerId),
+                    mFetcherConfig.getWorkerAppenderPath(mWorkerId));
 
-            int page = mConfig.getWorkerPage(mWorkerId);
-            int step = mConfig.getWorkerStep(mWorkerId);
+            int page = mFetcherConfig.getWorkerPage(mWorkerId);
+            int step = mFetcherConfig.getWorkerStep(mWorkerId);
 
             while (true) {
                 try {
@@ -79,9 +79,9 @@ public class Fetcher {
                                     "Worker %d has completed work", mWorkerId));
 
                             // save results, next time from page+step
-                            mConfig.setWorkerId(mWorkerId);
-                            mConfig.setWorkerPage(mWorkerId, page + step);
-                            mConfig.setWorkerStep(mWorkerId, step);
+                            mFetcherConfig.setWorkerId(mWorkerId);
+                            mFetcherConfig.setWorkerPage(mWorkerId, page + step);
+                            mFetcherConfig.setWorkerStep(mWorkerId, step);
 
                             mNrCompletedWorkerLock.lock();
                             mNrCompletedWorker += 1;
@@ -104,9 +104,9 @@ public class Fetcher {
                                 "Worker %d has encountered error", mWorkerId));
 
                         // save results, next time from page
-                        mConfig.setWorkerId(mWorkerId);
-                        mConfig.setWorkerPage(mWorkerId, page);
-                        mConfig.setWorkerStep(mWorkerId, step);
+                        mFetcherConfig.setWorkerId(mWorkerId);
+                        mFetcherConfig.setWorkerPage(mWorkerId, page);
+                        mFetcherConfig.setWorkerStep(mWorkerId, step);
 
                         mNrDiedWorkerLock.lock();
                         mNrDiedWorker++;
@@ -135,6 +135,8 @@ public class Fetcher {
 
     public Fetcher(String[] tags) {
         this.mTags = tags;
+        this.mFetcherConfig = new FetcherConfig(FetcherConfig.convert2ConfigFileName(tags));
+        this.mFetcherResult = new FetcherResult();
     }
 
     public void fetch() {
@@ -143,26 +145,28 @@ public class Fetcher {
         mWorkers = Executors.newFixedThreadPool(mNrWorker);
 
         // workers should be iterated by workerBegin, workerStep and workerEnd
-        for (int i = mConfig.workerBegin(); i < mConfig.workerEnd(); i += mConfig.workerStep()) {
-            mWorkers.submit(new Worker(mConfig.getWorkerId(i)));
+        for (int i = mFetcherConfig.workerBegin();
+             i < mFetcherConfig.workerEnd();
+             i += mFetcherConfig.workerStep()) {
+            mWorkers.submit(new Worker(mFetcherConfig.getWorkerId(i)));
         }
     }
 
     private boolean tryRestart() {
         try {
             // start according to the configuration files
-            mConfig.load();
-            mFetcherResult.nrPage = mConfig.getResultNrPage();
-            mFetcherResult.nrItem = mConfig.getResultNrItem();
+            mFetcherConfig.load();
+            mFetcherResult.nrPage = mFetcherConfig.getResultNrPage();
+            mFetcherResult.nrItem = mFetcherConfig.getResultNrItem();
         } catch (FileNotFoundException e) {
             // do not need to restart, start from scratch
-            mConfig.reset();
+            mFetcherConfig.reset();
             return false;
         } catch (IOException e) {
             e.printStackTrace();
             return false;
         } finally {
-            mNrWorker = mConfig.getNrWorker();
+            mNrWorker = mFetcherConfig.getNrWorker();
         }
 
         return false;
@@ -178,16 +182,16 @@ public class Fetcher {
                         mMonitorLock.wait();
                     }
 
-                    if (mNrCompletedWorker + mNrDiedWorker == mConfig.getNrWorker()) {
+                    if (mNrCompletedWorker + mNrDiedWorker == mFetcherConfig.getNrWorker()) {
                         long endTime = System.currentTimeMillis();
 
                         // shutdown all workers
                         mWorkers.shutdownNow();
 
                         // save to configurations
-                        mConfig.setResultNrPage(mFetcherResult.nrPage);
-                        mConfig.setResultNrItem(mFetcherResult.nrItem);
-                        mConfig.store();
+                        mFetcherConfig.setResultNrPage(mFetcherResult.nrPage);
+                        mFetcherConfig.setResultNrItem(mFetcherResult.nrItem);
+                        mFetcherConfig.store();
 
                         // output result
                         if (mNrDiedWorker == 0) {

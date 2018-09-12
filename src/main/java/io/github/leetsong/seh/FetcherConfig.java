@@ -1,6 +1,8 @@
 package io.github.leetsong.seh;
 
 import java.io.*;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 public class FetcherConfig {
@@ -13,6 +15,20 @@ public class FetcherConfig {
     public FetcherConfig(String fileName) {
         this.mFileName = fileName;
         reset();
+    }
+
+    public static String convert2ConfigFileName(String[] tags) {
+        try {
+            // convert tags to legal path characters
+            return URLEncoder.encode(
+                    String.format("fetcher_%s.seh", String.join("_", tags)),
+                    StandardCharsets.UTF_8.toString());
+        } catch (Exception e) {
+            // ignore, never reach here
+            e.printStackTrace();
+            System.exit(1);
+            return null;
+        }
     }
 
     synchronized public void load()
