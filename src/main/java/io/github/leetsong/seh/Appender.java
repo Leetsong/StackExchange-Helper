@@ -1,4 +1,4 @@
-package com.example.stackoverflow.fetcher;
+package io.github.leetsong.seh;
 
 /**
  * Appender is a class that handle SearchResult,

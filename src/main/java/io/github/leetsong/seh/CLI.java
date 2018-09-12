@@ -1,4 +1,4 @@
-package com.example.stackoverflow.fetcher;
+package io.github.leetsong.seh;
 
 public class CLI {
 
@@ -60,7 +60,7 @@ public class CLI {
                 break;
             default:
                 stderr("'" + mCommand + "' is not defined, " +
-                        "see 'StackOverflow-Fetcher help'");
+                        "see 'seh help'");
                 exit(0);
         }
     }
@@ -74,7 +74,7 @@ public class CLI {
     }
 
     public void stderr(String message) {
-        System.err.println("StackOverflow-Fetcher: " + message);
+        System.err.println("seh: " + message);
     }
 
     private void parseCommands(String[] commands) {
@@ -95,12 +95,12 @@ public class CLI {
 
     private void version() {
         // TODO
-        stdout("StackOverflow-Fetcher 1.0");
+        stdout("StackExchange-Helper (SEH) 1.0");
     }
 
     private void help() {
         // TODO
-        stdout("usage: StackOverflow-Fetcher command [options]");
+        stdout("usage: seh command [options]");
         stdout("[options]:");
         stdout("  fetch    fetch interested queries");
         stdout("  combine  combine fetched csv results");
@@ -118,7 +118,7 @@ public class CLI {
                 break;
             default:
                 stderr("'" + cmd + "' is not defined, " +
-                        "see 'StackOverflow-Fetcher help'");
+                        "see 'seh help'");
                 exit(0);
         }
     }

@@ -1,4 +1,4 @@
-package com.example.stackoverflow.fetcher;
+package io.github.leetsong.seh;
 
 import retrofit2.Call;
 import retrofit2.http.GET;

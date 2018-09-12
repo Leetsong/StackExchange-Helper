@@ -1,4 +1,4 @@
-package com.example.stackoverflow.fetcher;
+package io.github.leetsong.seh;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;

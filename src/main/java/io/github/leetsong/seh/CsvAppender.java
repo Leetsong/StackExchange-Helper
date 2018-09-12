@@ -1,4 +1,4 @@
-package com.example.stackoverflow.fetcher;
+package io.github.leetsong.seh;
 
 import com.opencsv.CSVWriter;
 import org.slf4j.Logger;

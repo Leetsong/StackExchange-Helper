@@ -1,4 +1,4 @@
-package com.example.stackoverflow.fetcher;
+package io.github.leetsong.seh;
 
 import org.apache.commons.cli.*;
 
@@ -51,7 +51,7 @@ public class CombinerCmd extends CLI.Cmd {
     @Override
     public void help() {
         // TODO
-        mCli.stdout("StackOverflow-Fetcher combine -s <src> -d <dest>");
+        mCli.stdout("seh combine -s <src> -d <dest>");
         mCli.stdout("<src>  files you want to combine from, separated by ';'");
         mCli.stdout("       e.g., a.csv;b.csv;c.csv");
         mCli.stdout("<dest> file you want to combine to");

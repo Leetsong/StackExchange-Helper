@@ -1,4 +1,4 @@
-package com.example.stackoverflow.fetcher;
+package io.github.leetsong.seh;
 
 import org.apache.commons.cli.*;
 
@@ -41,7 +41,7 @@ public class FetcherCmd extends CLI.Cmd {
     @Override
     public void help() {
         // TODO
-        mCli.stdout("StackOverflow-Fetcher fetch -t <tags>");
+        mCli.stdout("seh fetch -t <tags>");
         mCli.stdout("<tags> tags you want to search, separated by ';'");
         mCli.stdout("       e.g., android;android-webview;webview");
     }

@@ -1,4 +1,20 @@
 0. Synonyms
+    Find synonyms of the tags, and add them to the search
+    condition tagged.
+2. Postprocess the files
+    2) Analysing
+        Filter questions related to webview performance, and
+        read them, take notes
+3. Add socks proxy
+4. Add google search support
+5. Add repackage
+6. *** Add property tags to configurations ***
+    To avoid wrongly restarting, a `search.tags' property, which
+    indicates the search conditions is required.
+7. Add support to avoid StackExchange throttle
+8. Add support of different page size, different number of workers
+=====
+0. Synonyms
     Find synonyms of `android', and add them to the search
     condition tagged.
 2. Postprocess the files
