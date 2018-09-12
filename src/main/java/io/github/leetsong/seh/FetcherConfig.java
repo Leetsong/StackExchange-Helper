@@ -47,18 +47,18 @@ public class FetcherConfig {
         synchronized (mProperties) {
             mProperties.clear();
             // set global
-            mProperties.setProperty(propertyGlobalNrWorker(), Integer.toString(DEFAULT_NR_WORKER));
+            mProperties.setProperty(property$Global_NrWorker(), Integer.toString(DEFAULT_NR_WORKER));
             // set worker
             for (int i = workerBegin(); i < workerEnd(); i += workerStep()) {
-                mProperties.setProperty(propertyWorkerId(i), Integer.toString(i));
-                mProperties.setProperty(propertyWorkerPage(i), Integer.toString(i));
-                mProperties.setProperty(propertyWorkerStep(i), Integer.toString(DEFAULT_NR_WORKER));
-                mProperties.setProperty(propertyWorkerAppenderType(i), CsvAppender.APPENDER_TYPE);
-                mProperties.setProperty(propertyWorkerAppenderPath(i), String.format("worker[%d]_appender.csv", i));
+                mProperties.setProperty(property$Worker_Id(i), Integer.toString(i));
+                mProperties.setProperty(property$Worker_Page(i), Integer.toString(i));
+                mProperties.setProperty(property$Worker_Step(i), Integer.toString(DEFAULT_NR_WORKER));
+                mProperties.setProperty(property$Worker_Appender_Type(i), CsvAppender.APPENDER_TYPE);
+                mProperties.setProperty(property$Worker_Appender_Path(i), String.format("worker[%d]_appender.csv", i));
             }
             // set result
-            mProperties.setProperty(propertyResultNrPage(), Integer.toString(0));
-            mProperties.setProperty(propertyResultNrItem(), Integer.toString(0));
+            mProperties.setProperty(property$Result_NrPage(), Integer.toString(0));
+            mProperties.setProperty(property$Result_NrItem(), Integer.toString(0));
         }
     }
 
@@ -71,35 +71,35 @@ public class FetcherConfig {
 
     // property getters
     public int getNrWorker() {
-        return Integer.parseInt(mProperties.getProperty(propertyGlobalNrWorker()));
+        return Integer.parseInt(mProperties.getProperty(property$Global_NrWorker()));
     }
 
     public int getWorkerId(int i) {
-        return Integer.parseInt(mProperties.getProperty(propertyWorkerId(i)));
+        return Integer.parseInt(mProperties.getProperty(property$Worker_Id(i)));
     }
 
     public int getWorkerPage(int id) {
-        return Integer.parseInt(mProperties.getProperty(propertyWorkerPage(id)));
+        return Integer.parseInt(mProperties.getProperty(property$Worker_Page(id)));
     }
 
     public int getWorkerStep(int id) {
-        return Integer.parseInt(mProperties.getProperty(propertyWorkerStep(id)));
+        return Integer.parseInt(mProperties.getProperty(property$Worker_Step(id)));
     }
 
     public String getWorkerAppenderPath(int id) {
-        return mProperties.getProperty(propertyWorkerAppenderPath(id));
+        return mProperties.getProperty(property$Worker_Appender_Path(id));
     }
 
     public String getWorkerAppenderType(int id) {
-        return mProperties.getProperty(propertyWorkerAppenderType(id));
+        return mProperties.getProperty(property$Worker_Appender_Type(id));
     }
 
     public int getResultNrPage() {
-        return Integer.parseInt(mProperties.getProperty(propertyResultNrPage()));
+        return Integer.parseInt(mProperties.getProperty(property$Result_NrPage()));
     }
 
     public int getResultNrItem() {
-        return Integer.parseInt(mProperties.getProperty(propertyResultNrItem()));
+        return Integer.parseInt(mProperties.getProperty(property$Result_NrItem()));
     }
 
     public String getFileName() {
@@ -109,49 +109,49 @@ public class FetcherConfig {
     // property setters
     public void setNrWorker(int nrWorker) {
         synchronized (mProperties) {
-            mProperties.setProperty(propertyGlobalNrWorker(), Integer.toString(nrWorker));
+            mProperties.setProperty(property$Global_NrWorker(), Integer.toString(nrWorker));
         }
     }
 
     public void setWorkerId(int id) {
         synchronized (mProperties) {
-            mProperties.setProperty(propertyWorkerId(id), Integer.toString(id));
+            mProperties.setProperty(property$Worker_Id(id), Integer.toString(id));
         }
     }
 
     public void setWorkerPage(int id, int page) {
         synchronized (mProperties) {
-            mProperties.setProperty(propertyWorkerPage(id), Integer.toString(page));
+            mProperties.setProperty(property$Worker_Page(id), Integer.toString(page));
         }
     }
 
     public void setWorkerStep(int id, int step) {
         synchronized (mProperties) {
-            mProperties.setProperty(propertyWorkerStep(id), Integer.toString(step));
+            mProperties.setProperty(property$Worker_Step(id), Integer.toString(step));
         }
     }
 
     public void setWorkerAppenderPath(int id, String name) {
         synchronized (mProperties) {
-            mProperties.setProperty(propertyWorkerAppenderPath(id), name);
+            mProperties.setProperty(property$Worker_Appender_Path(id), name);
         }
     }
 
     public void setWorkerAppenderType(int id, String type) {
         synchronized (mProperties) {
-            mProperties.setProperty(propertyWorkerAppenderType(id), type);
+            mProperties.setProperty(property$Worker_Appender_Type(id), type);
         }
     }
 
     public void setResultNrPage(int nrPage) {
         synchronized (mProperties) {
-            mProperties.setProperty(propertyResultNrPage(), Integer.toString(nrPage));
+            mProperties.setProperty(property$Result_NrPage(), Integer.toString(nrPage));
         }
     }
 
     public void setResultNrItem(int nrItem) {
         synchronized (mProperties) {
-            mProperties.setProperty(propertyResultNrItem(), Integer.toString(nrItem));
+            mProperties.setProperty(property$Result_NrItem(), Integer.toString(nrItem));
         }
     }
 
@@ -160,35 +160,35 @@ public class FetcherConfig {
     }
     
     // property names
-    private String propertyGlobalNrWorker() {
+    private String property$Global_NrWorker() {
         return "global.nr_worker";
     }
 
-    private String propertyWorkerId(int id) {
+    private String property$Worker_Id(int id) {
         return String.format("worker[%d].id", id);
     }
 
-    private String propertyWorkerPage(int id) {
+    private String property$Worker_Page(int id) {
         return String.format("worker[%d].page", id);
     }
 
-    private String propertyWorkerStep(int id) {
+    private String property$Worker_Step(int id) {
         return String.format("worker[%d].step", id);
     }
 
-    private String propertyWorkerAppenderType(int id) {
+    private String property$Worker_Appender_Type(int id) {
         return String.format("worker[%d].appender.type", id);
     }
 
-    private String propertyWorkerAppenderPath(int id) {
+    private String property$Worker_Appender_Path(int id) {
         return String.format("worker[%d].appender.path", id);
     }
 
-    private String propertyResultNrPage() {
+    private String property$Result_NrPage() {
         return "result.nr_page";
     }
 
-    private String propertyResultNrItem() {
+    private String property$Result_NrItem() {
         return "result.nr_item";
     }
 }

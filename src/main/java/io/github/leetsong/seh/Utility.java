@@ -21,4 +21,50 @@ public class Utility {
             return String.format("%fh", (double)diff / 3600_000);
         }
     }
+
+    public static String camelToUnderline(String camel) {
+        if (null == camel) { return null; }
+
+        char          c;
+        int           l = camel.length();
+        StringBuilder s = new StringBuilder(2 * l);
+
+        for (int i = 0; i < l; i ++) {
+            c = camel.charAt(i);
+            if ('A' <= c &&  c <= 'Z') {
+                if (i != 0 && Character.isAlphabetic(camel.charAt(i - 1))) { s.append('_'); }
+                s.append(Character.toLowerCase(c));
+            } else {
+                s.append(c);
+            }
+        }
+
+        return s.toString();
+    }
+
+    public static String underlineToCamel(String underline) {
+        if (null == underline) { return null; }
+
+        char          c;
+        int           l = underline.length();
+        StringBuilder s = new StringBuilder(l);
+
+        int i = 0;
+        while (i < l) {
+            c = underline.charAt(i);
+
+            if ('_' == c) {
+                while ('_' == c) {
+                    i += 1; c = underline.charAt(i);
+                }
+                s.append(Character.toUpperCase(c));
+            } else {
+                s.append(c);
+            }
+
+            i += 1;
+        }
+
+        return s.toString();
+    }
 }

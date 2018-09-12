@@ -1,5 +1,8 @@
 package io.github.leetsong.seh;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CLI {
 
     public static abstract class Cmd {
@@ -31,14 +34,30 @@ public class CLI {
         public abstract void help();
     }
 
-    private String   mCommand;
-    private String[] mCommandArgs;
+    public interface OnSetUpListener {
+        void onSetUp();
+    }
+
+    public interface OnTearDownListener {
+        void onTearDown();
+    }
+
+    // put these two listeners ahead, they have to be loaded ahead of those
+    // using them
+    private List<OnSetUpListener>    mSetUpListeners = new ArrayList<>();
+    private List<OnTearDownListener> mTearDownListeners = new ArrayList<>();
+
+    private String    mCommand;
+    private String[]  mCommandArgs;
+    private ConfigCmd mConfigCmd = new ConfigCmd(this);
 
     public CLI(String[] commands) {
         parseCommands(commands);
     }
 
     public void run() {
+        setUp();
+
         if (mCommand.equals("help")) {
             if (mCommandArgs != null) {
                 help(mCommandArgs[0]);
@@ -58,23 +77,46 @@ public class CLI {
             case CombinerCmd.COMMAND:
                 new CombinerCmd(this).execute(mCommandArgs);
                 break;
+            case ConfigCmd.COMMAND:
+                mConfigCmd.execute(mCommandArgs);
+                break;
             default:
                 stderr("'" + mCommand + "' is not defined, " +
                         "see 'seh help'");
                 exit(0);
         }
+
+        tearDown();
     }
 
     public void exit(int status) {
         System.exit(status);
     }
 
+    public void setOnSetUpListener(OnSetUpListener l) {
+        mSetUpListeners.add(l);
+    }
+
+    public void setOnTearDownListener(OnTearDownListener l) {
+        mTearDownListeners.add(l);
+    }
+
     public void stdout(String message) {
         System.out.println(message);
     }
 
+    public void stdwarn(String message) {
+        System.out.print("seh: warning: " + message);
+    }
+
     public void stderr(String message) {
-        System.err.println("seh: " + message);
+        System.err.println("seh: error: " + message);
+    }
+
+    private void setUp() {
+        for (OnSetUpListener l : mSetUpListeners) {
+            l.onSetUp();
+        }
     }
 
     private void parseCommands(String[] commands) {
@@ -100,10 +142,11 @@ public class CLI {
 
     private void help() {
         // TODO
-        stdout("usage: seh command [options]");
-        stdout("[options]:");
+        stdout("usage: seh <command> [options]");
+        stdout("<command>:");
         stdout("  fetch    fetch interested queries");
         stdout("  combine  combine fetched csv results");
+        stdout("  config   change seh configs");
         stdout("  version  show version");
         stdout("  help     show this");
     }
@@ -116,10 +159,19 @@ public class CLI {
             case CombinerCmd.COMMAND:
                 new CombinerCmd(this).help();
                 break;
+            case ConfigCmd.COMMAND:
+                mConfigCmd.help();
+                break;
             default:
                 stderr("'" + cmd + "' is not defined, " +
                         "see 'seh help'");
                 exit(0);
+        }
+    }
+
+    private void tearDown() {
+        for (OnTearDownListener l : mTearDownListeners) {
+            l.onTearDown();
         }
     }
 

@@ -150,6 +150,13 @@ public class Fetcher {
              i += mFetcherConfig.workerStep()) {
             mWorkers.submit(new Worker(mFetcherConfig.getWorkerId(i)));
         }
+
+        try {
+            // wait until monitor stops
+            mMonitor.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private boolean tryRestart() {

@@ -41,7 +41,7 @@ public class FetcherCmd extends CLI.Cmd {
     @Override
     public void help() {
         // TODO
-        mCli.stdout("seh fetch -t <tags>");
+        mCli.stdout("seh fetch --tag|-t <tags>");
         mCli.stdout("<tags> tags you want to search, separated by ';'");
         mCli.stdout("       e.g., android;android-webview;webview");
     }
