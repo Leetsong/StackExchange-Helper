@@ -2,12 +2,14 @@ package io.github.leetsong.seh;
 
 import io.github.leetsong.seh.data.stackexchange.ItemContainer;
 import io.github.leetsong.seh.data.stackexchange.SearchItem;
+import io.github.leetsong.seh.data.stackexchange.SynonymItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import retrofit2.Response;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
@@ -39,6 +41,7 @@ public class Fetcher {
     private Lock mNrCompletedWorkerLock = new ReentrantLock();
 
     private String[] mTags;
+    private String[] mSynonyms;
     private final FetcherConfig mFetcherConfig;
     private final FetcherResult mFetcherResult;
 
@@ -60,10 +63,13 @@ public class Fetcher {
 
             int page = mFetcherConfig.getWorkerPage(mWorkerId);
             int step = mFetcherConfig.getWorkerStep(mWorkerId);
+            String[] tags = new String[mTags.length + mSynonyms.length];
+            System.arraycopy(mTags, 0, tags, 0, mTags.length);
+            System.arraycopy(mSynonyms, 0, tags, mTags.length, mSynonyms.length);
 
             while (true) {
                 try {
-                    Response<ItemContainer<SearchItem>> response = service.search(page, mTags).execute();
+                    Response<ItemContainer<SearchItem>> response = service.search(page, tags).execute();
                     if (response.isSuccessful()) {
                         ItemContainer<SearchItem> result = response.body();
                         logger.info(String.format("Worker %d, page: %d, item: %d",
@@ -102,7 +108,7 @@ public class Fetcher {
                             page += step;
                         }
                     } else {
-                        logger.info(String.format(
+                        logger.error(String.format(
                                 "Worker %d has encountered error", mWorkerId));
 
                         // save results, next time from page
@@ -137,6 +143,7 @@ public class Fetcher {
 
     public Fetcher(String[] tags) {
         this.mTags = tags;
+        this.mSynonyms = new String[0];
         this.mFetcherConfig = new FetcherConfig(FetcherConfig.convert2ConfigFileName(tags));
         this.mFetcherResult = new FetcherResult();
     }
@@ -144,6 +151,7 @@ public class Fetcher {
     public void fetch() {
         tryRestart();
         startMonitor();
+        fillSynonyms();
         mWorkers = Executors.newFixedThreadPool(mNrWorker);
 
         // workers should be iterated by workerBegin, workerStep and workerEnd
@@ -209,15 +217,15 @@ public class Fetcher {
                             logger.info("  - total pages: " + mFetcherResult.nrPage);
                             logger.info("  - total items: " + mFetcherResult.nrItem);
                         } else {
-                            logger.info("Failed, the results:");
-                            logger.info("  - used time: " + Utility.timeInterval(startTime, endTime));
-                            logger.info("  - total pages: " + mFetcherResult.nrPage);
-                            logger.info("  - total items: " + mFetcherResult.nrItem);
+                            logger.error("Failed, the results:");
+                            logger.error("  - used time: " + Utility.timeInterval(startTime, endTime));
+                            logger.error("  - total pages: " + mFetcherResult.nrPage);
+                            logger.error("  - total items: " + mFetcherResult.nrItem);
                             for (Map.Entry<Integer, Response> entry : mFetcherResult.errorResponses.entrySet()) {
-                                logger.info("  - worker: " + entry.getKey());
-                                logger.info("    - code: " + entry.getValue().code());
-                                logger.info("    - message: " + entry.getValue().message());
-                                logger.info("    - toString: " + entry.getValue().toString());
+                                logger.error("  - worker: " + entry.getKey());
+                                logger.error("    - code: " + entry.getValue().code());
+                                logger.error("    - message: " + entry.getValue().message());
+                                logger.error("    - toString: " + entry.getValue().toString());
                             }
                         }
 
@@ -230,6 +238,35 @@ public class Fetcher {
             }
         });
         mMonitor.start();
+    }
+
+    private void fillSynonyms() {
+        StackOverflowClient client = StackOverflowClient.getClient();
+        StackOverflowService service = client.getStackOverflowService();
+
+        // only fetch 1 page, it is enough
+        try {
+            Response<ItemContainer<SynonymItem>> response = service.synonyms(1, mTags).execute();
+            if (response.isSuccessful()) {
+                ItemContainer<SynonymItem> result = response.body();
+                if (result != null) {
+                    List<SynonymItem> synonyms = result.getItems();
+                    if (synonyms != null && synonyms.size() != 0) {
+                        mSynonyms = new String[synonyms.size()];
+                        for (int i = 0; i < synonyms.size(); i ++) {
+                            mSynonyms[i] = synonyms.get(i).getFromTag();
+                        }
+                    }
+                } else {
+                    logger.error("Failed to get synonyms due to: no response body is presented");
+                }
+            } else {
+                logger.error("Failed to get synonyms due to: " + response.toString());
+            }
+        } catch (IOException e) {
+            logger.error("Failed to get synonyms due to:");
+            e.printStackTrace();
+        }
     }
 
     public static void main(String[] args) {

@@ -1,3 +1,14 @@
+2. Postprocess the files
+    2) Analysing
+        Filter questions related to webview performance, and
+        read them, take notes
+4. Add google- and StackOverflow-site search support
+    Integrate socli
+5. Add repackage
+7. Add support to avoid StackExchange throttle
+8. Add support of different page size, different number of workers
+9. Add ss auto-switch
+=====
 0. Synonyms
     Find synonyms of the tags, and add them to the search
     condition tagged.
