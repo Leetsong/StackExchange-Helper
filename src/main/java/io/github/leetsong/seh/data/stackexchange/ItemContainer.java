@@ -1,14 +1,14 @@
-package io.github.leetsong.seh;
+package io.github.leetsong.seh.data.stackexchange;
 
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 import java.util.List;
 
-public class SearchResult implements Serializable {
+public class ItemContainer<T> implements Serializable {
 
     @SerializedName("items")
-    List<SearchItem> items;
+    List<T> items;
     @SerializedName("has_more")
     boolean hasMore;
     @SerializedName("quota_max")
@@ -16,11 +16,11 @@ public class SearchResult implements Serializable {
     @SerializedName("quota_remaining")
     int quotaRemaining;
 
-    public List<SearchItem> getItems() {
+    public List<T> getItems() {
         return items;
     }
 
-    public void setItems(List<SearchItem> items) {
+    public void setItems(List<T> items) {
         this.items = items;
     }
 

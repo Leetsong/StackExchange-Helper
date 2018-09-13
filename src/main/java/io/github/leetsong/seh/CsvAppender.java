@@ -1,6 +1,8 @@
 package io.github.leetsong.seh;
 
 import com.opencsv.CSVWriter;
+import io.github.leetsong.seh.data.stackexchange.ItemContainer;
+import io.github.leetsong.seh.data.stackexchange.SearchItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +30,7 @@ public class CsvAppender extends AbstractAppender {
     }
 
     @Override
-    public void append(SearchResult result) {
+    public void append(ItemContainer<SearchItem> result) {
         result.getItems().forEach(item -> {
             csvWriter.writeNext(new String[] {
                 Long.toString(item.getQuestionId()),

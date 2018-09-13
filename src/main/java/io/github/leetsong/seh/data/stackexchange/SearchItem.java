@@ -1,4 +1,4 @@
-package io.github.leetsong.seh;
+package io.github.leetsong.seh.data.stackexchange;
 
 import com.google.gson.annotations.SerializedName;
 

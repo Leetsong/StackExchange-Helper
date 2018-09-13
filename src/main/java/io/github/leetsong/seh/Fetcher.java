@@ -1,5 +1,7 @@
 package io.github.leetsong.seh;
 
+import io.github.leetsong.seh.data.stackexchange.ItemContainer;
+import io.github.leetsong.seh.data.stackexchange.SearchItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import retrofit2.Response;
@@ -61,9 +63,9 @@ public class Fetcher {
 
             while (true) {
                 try {
-                    Response<SearchResult> response = service.search(page, mTags).execute();
+                    Response<ItemContainer<SearchItem>> response = service.search(page, mTags).execute();
                     if (response.isSuccessful()) {
-                        SearchResult result = response.body();
+                        ItemContainer<SearchItem> result = response.body();
                         logger.info(String.format("Worker %d, page: %d, item: %d",
                                 mWorkerId, page, result.getItems().size()));
 

@@ -1,5 +1,8 @@
 package io.github.leetsong.seh;
 
+import io.github.leetsong.seh.data.stackexchange.ItemContainer;
+import io.github.leetsong.seh.data.stackexchange.SearchItem;
+
 public class StdAppender extends AbstractAppender {
 
     // type of this appender
@@ -10,7 +13,7 @@ public class StdAppender extends AbstractAppender {
     }
 
     @Override
-    public void append(SearchResult result) {
+    public void append(ItemContainer<SearchItem> result) {
         System.out.println(String.format("||std::%s||: %s", mPath, result.toString()));
     }
 

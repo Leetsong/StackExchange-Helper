@@ -1,5 +1,7 @@
 package io.github.leetsong.seh;
 
+import io.github.leetsong.seh.data.stackexchange.ItemContainer;
+import io.github.leetsong.seh.data.stackexchange.SearchItem;
 import retrofit2.Call;
 
 public class StackOverflowService {
@@ -16,7 +18,7 @@ public class StackOverflowService {
         this.stackExchangeService = stackExchangeService;
     }
 
-    public Call<SearchResult> search(int page, String... tags) {
+    public Call<ItemContainer<SearchItem>> search(int page, String... tags) {
         String tagged = String.join(";", tags);
         return stackExchangeService.search(SITE, page, PAGESIZE, tagged, SORT, ORDER);
     }
