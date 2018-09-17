@@ -1,6 +1,8 @@
 package io.github.leetsong.seh;
 
 import com.opencsv.CSVWriter;
+import io.github.leetsong.seh.data.stackexchange.CsvItem;
+import io.github.leetsong.seh.data.stackexchange.CsvItemable;
 import io.github.leetsong.seh.data.stackexchange.ItemContainer;
 import io.github.leetsong.seh.data.stackexchange.SearchItem;
 import org.slf4j.Logger;
@@ -10,6 +12,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 
 public class CsvAppender extends AbstractAppender {
 
@@ -25,8 +28,12 @@ public class CsvAppender extends AbstractAppender {
 
     private CSVWriter csvWriter;
 
-    public static Appender newInstance(String path) {
+    public static CsvAppender newInstance(String path) {
         return new CsvAppender(path);
+    }
+
+    public void append(List<? extends CsvItemable> items) {
+        items.forEach(item -> csvWriter.writeNext(item.toCsvItem().toStringArray()));
     }
 
     @Override

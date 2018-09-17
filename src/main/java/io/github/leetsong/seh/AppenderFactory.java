@@ -9,6 +9,8 @@ public class AppenderFactory {
     // appender map
     private static final
     Map<String, Class<? extends Appender>> mAppenderMap = new HashMap<>();
+    // initialized flag
+    private static boolean isInitialized = false;
 
     public static void
     registerAppender(String type, Class<? extends Appender> appenderType) {
@@ -21,8 +23,11 @@ public class AppenderFactory {
     }
 
     public static void initialize() {
-        registerAppender(StdAppender.APPENDER_TYPE, StdAppender.class);
-        registerAppender(CsvAppender.APPENDER_TYPE, CsvAppender.class);
+        if (!isInitialized) {
+            registerAppender(StdAppender.APPENDER_TYPE, StdAppender.class);
+            registerAppender(CsvAppender.APPENDER_TYPE, CsvAppender.class);
+            isInitialized = true;
+        }
     }
 
     public static Class<? extends Appender> getAppenderType(String type) {

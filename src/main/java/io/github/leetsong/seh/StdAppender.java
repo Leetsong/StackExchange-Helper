@@ -8,7 +8,7 @@ public class StdAppender extends AbstractAppender {
     // type of this appender
     public static final String APPENDER_TYPE = "std";
 
-    public static Appender newInstance(String path) {
+    public static StdAppender newInstance(String path) {
         return new StdAppender(path);
     }
 
