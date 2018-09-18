@@ -7,6 +7,30 @@
 7. Add support to avoid StackExchange throttle
 8. Add support of different page size, different number of workers
 9. Add ss auto-switch
+11. Extract AppendableItem for Appender
+    1) Abstract multiple append() methods into
+        append(List<? extends AppendableItem>
+       and override it in CsvAppender using
+        append(List<? extends CsvItemable>
+    2) Add a append(CsvAppendable) to CsvAppender to lower
+       space cost
+    2) Make SearchItem implements CsvItemable
+    3) Abstract Fetcher from SoupFetcher and Fetcher, and
+       move AppenderFactory.initialize() to it
+12. Add captcha detection & user agent randomization
+    A captcha url example: https://www.google.com/sorry/index?continue=https://www.google.com/search%3Fq%3Dsite:stackoverflow.com%2Bandroid%26start%3D0%26num%3D30&q=EgSweqvQGKG4_9wFIhkA8aeDSw4hCN5zGGiuZrrfLsaNol54nxZjMgFy
+13. Add goo command
+14. Modify Fetcher name, along with its configurations name, add prefix
+=====
+2. Postprocess the files
+    2) Analysing
+        Filter questions related to webview performance, and
+        read them, take notes
+4. Add StackOverflow-site search support
+5. Add repackage in maven
+7. Add support to avoid StackExchange throttle
+8. Add support of different page size, different number of workers
+9. Add ss auto-switch
 10. Parallelize GooFetcher, and add restart mechanism, synonyms, logging
 11. Extract AppendableItem for Appender
     1) Abstract multiple append() methods into

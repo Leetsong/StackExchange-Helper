@@ -8,6 +8,7 @@ import java.util.Properties;
 public class FetcherConfig {
 
     private static final int DEFAULT_NR_WORKER = 16;
+    private static final int DEFAULT_PAGE_SIZE = 30;
 
     private final Properties mProperties = new Properties();
     private String mFileName;
@@ -17,11 +18,11 @@ public class FetcherConfig {
         reset();
     }
 
-    public static String convert2ConfigFileName(String[] tags) {
+    public static String convert2ConfigFileName(String[] x) {
         try {
             // convert tags to legal path characters
             return URLEncoder.encode(
-                    String.format("fetcher_%s.seh", String.join("_", tags)),
+                    String.format("fetcher_%s.seh", String.join("_", x)),
                     StandardCharsets.UTF_8.toString());
         } catch (Exception e) {
             // ignore, never reach here
@@ -59,6 +60,12 @@ public class FetcherConfig {
             // set result
             mProperties.setProperty(property$Result_NrPage(), Integer.toString(0));
             mProperties.setProperty(property$Result_NrItem(), Integer.toString(0));
+            // set GooFetcher appender worker
+            mProperties.setProperty(property$GooFetcher_AppenderWorker_Appender_Path(), "goofetcher_worker_appender.csv");
+            mProperties.setProperty(property$GooFetcher_AppenderWorker_Appender_Type(), CsvAppender.APPENDER_TYPE);
+            // set GooFetcher result
+            mProperties.setProperty(property$GooFetcher_Result_Start(), Integer.toString(0));
+            mProperties.setProperty(property$GooFetcher_Result_PageSize(), Integer.toString(DEFAULT_PAGE_SIZE));
         }
     }
 
@@ -100,6 +107,22 @@ public class FetcherConfig {
 
     public int getResultNrItem() {
         return Integer.parseInt(mProperties.getProperty(property$Result_NrItem()));
+    }
+
+    public String getGooFetcherAppenderWorkerAppenderPath() {
+        return mProperties.getProperty(property$GooFetcher_AppenderWorker_Appender_Path());
+    }
+
+    public String getGooFetcherAppenderWorkerAppenderType() {
+        return mProperties.getProperty(property$GooFetcher_AppenderWorker_Appender_Type());
+    }
+
+    public int getGooFetcherResultStart() {
+        return Integer.parseInt(mProperties.getProperty(property$GooFetcher_Result_Start()));
+    }
+
+    public int getGooFetcherResultPageSize() {
+        return Integer.parseInt(mProperties.getProperty(property$GooFetcher_Result_PageSize()));
     }
 
     public String getFileName() {
@@ -155,6 +178,30 @@ public class FetcherConfig {
         }
     }
 
+    public void setGooFetcherAppenderWorkerAppenderType(String type) {
+        synchronized (mProperties) {
+            mProperties.setProperty(property$GooFetcher_AppenderWorker_Appender_Type(), type);
+        }
+    }
+
+    public void setGooFetcherAppenderWorkerAppenderPath(String path) {
+        synchronized (mProperties) {
+            mProperties.setProperty(property$GooFetcher_AppenderWorker_Appender_Path(), path);
+        }
+    }
+
+    public void setGooFetcherResultStart(int start) {
+        synchronized (mProperties) {
+            mProperties.setProperty(property$GooFetcher_Result_Start(), Integer.toString(start));
+        }
+    }
+
+    public void setGooFetcherResultPageSize(int pageSize) {
+        synchronized (mProperties) {
+            mProperties.setProperty(property$GooFetcher_Result_PageSize(), Integer.toString(pageSize));
+        }
+    }
+
     public void setFileName(String fileName) {
         this.mFileName = fileName;
     }
@@ -190,5 +237,21 @@ public class FetcherConfig {
 
     private String property$Result_NrItem() {
         return "result.nr_item";
+    }
+
+    private String property$GooFetcher_AppenderWorker_Appender_Type() {
+        return "goo_fetcher.appender_worker.appender.type";
+    }
+
+    private String property$GooFetcher_AppenderWorker_Appender_Path() {
+        return "goo_fetcher.appender_worker.appender.path";
+    }
+
+    private String property$GooFetcher_Result_Start() {
+        return "goo_fetcher.result.start";
+    }
+
+    private String property$GooFetcher_Result_PageSize() {
+        return "goo_fetcher.result.page_size";
     }
 }
