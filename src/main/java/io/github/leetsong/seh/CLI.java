@@ -80,6 +80,9 @@ public class CLI {
             case ConfigCmd.COMMAND:
                 mConfigCmd.execute(mCommandArgs);
                 break;
+            case GooCmd.COMMAND:
+                new GooCmd(this).execute(mCommandArgs);
+                break;
             default:
                 stderr("'" + mCommand + "' is not defined, " +
                         "see 'seh help'");
@@ -144,7 +147,8 @@ public class CLI {
         // TODO
         stdout("usage: seh <command> [options]");
         stdout("<command>:");
-        stdout("  fetch    fetch interested queries");
+        stdout("  fetch    fetch interested queries using StackExchange API");
+        stdout("  goo      fetch interested queries using Google Search");
         stdout("  combine  combine fetched csv results");
         stdout("  config   change seh configs");
         stdout("  version  show version");
@@ -161,6 +165,9 @@ public class CLI {
                 break;
             case ConfigCmd.COMMAND:
                 mConfigCmd.help();
+                break;
+            case GooCmd.COMMAND:
+                new GooCmd(this).help();
                 break;
             default:
                 stderr("'" + cmd + "' is not defined, " +

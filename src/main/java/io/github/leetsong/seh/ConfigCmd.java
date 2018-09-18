@@ -116,10 +116,10 @@ public class ConfigCmd extends CLI.Cmd
                 String socks5Url = mProperties.getProperty(property$Socks5_Url());
                 String socks5Port = mProperties.getProperty(property$Socks5_Port());
                 if (socks5Url != null) {
-                    System.setProperty("socks.proxyHost", socks5Url);
+                    System.setProperty("socksProxyHost", socks5Url);
                 }
                 if (socks5Port != null) {
-                    System.setProperty("socks.proxyPort", socks5Port);
+                    System.setProperty("socksProxyPort", socks5Port);
                 }
             }
         } catch (IOException e) {
