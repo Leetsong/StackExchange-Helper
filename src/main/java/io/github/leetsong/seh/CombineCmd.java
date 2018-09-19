@@ -4,7 +4,7 @@ import org.apache.commons.cli.*;
 
 import java.util.Arrays;
 
-public class CombinerCmd extends CLI.Cmd {
+public class CombineCmd extends CLI.Cmd {
 
     private static class CLI_OPTIONS {
         static final String  OPT_SRC_SHORT = "s";
@@ -20,7 +20,7 @@ public class CombinerCmd extends CLI.Cmd {
 
     public static final String COMMAND = "combine";
 
-    public CombinerCmd(CLI cli) {
+    public CombineCmd(CLI cli) {
         super(cli);
     }
 

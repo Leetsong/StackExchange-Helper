@@ -74,8 +74,8 @@ public class CLI {
             case FetchCmd.COMMAND:
                 new FetchCmd(this).execute(mCommandArgs);
                 break;
-            case CombinerCmd.COMMAND:
-                new CombinerCmd(this).execute(mCommandArgs);
+            case CombineCmd.COMMAND:
+                new CombineCmd(this).execute(mCommandArgs);
                 break;
             case ConfigCmd.COMMAND:
                 mConfigCmd.execute(mCommandArgs);
@@ -160,8 +160,8 @@ public class CLI {
             case FetchCmd.COMMAND:
                 new FetchCmd(this).help();
                 break;
-            case CombinerCmd.COMMAND:
-                new CombinerCmd(this).help();
+            case CombineCmd.COMMAND:
+                new CombineCmd(this).help();
                 break;
             case ConfigCmd.COMMAND:
                 mConfigCmd.help();
