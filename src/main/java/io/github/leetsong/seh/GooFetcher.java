@@ -312,6 +312,7 @@ public class GooFetcher {
     public GooFetcher(String query, int total) {
         this.mQuery = query;
         this.mTotal = total;
+        this.mSynonyms = new String[0];
         this.mAppenderWorkerLock = new Object();
         this.mLinksQueue = new ArrayBlockingQueue<>(DEFAULT_QUEUE_CAPACITY);
         this.mGItemsQueue = new ArrayBlockingQueue<>(DEFAULT_QUEUE_CAPACITY);
