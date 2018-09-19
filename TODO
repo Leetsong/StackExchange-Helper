@@ -3,6 +3,23 @@
         Filter questions related to webview performance, and
         read them, take notes
 4. Add StackOverflow-site search support
+7. Add support to avoid StackExchange throttle
+8. Add support of different page size, different number of workers
+9. Add ss auto-switch
+12. Add captcha detection & user agent randomization
+    A captcha url example: https://www.google.com/sorry/index?continue=https://www.google.com/search%3Fq%3Dsite:stackoverflow.com%2Bandroid%26start%3D0%26num%3D30&q=EgSweqvQGKG4_9wFIhkA8aeDSw4hCN5zGGiuZrrfLsaNol54nxZjMgFy
+13. Google cannot be accessed in Windows10
+    As title described, SEH cannot access Google in Windows10.
+    A `SocketTimeoutException: Read timed out' was thrown. This
+    maybe caused by the DNS resolution of Java. Via profiling
+    logs of ss, we saw that ss accessed a host name when using
+    browsers, while accessed an IP address when using Java.
+=====
+2. Postprocess the files
+    2) Analysing
+        Filter questions related to webview performance, and
+        read them, take notes
+4. Add StackOverflow-site search support
 5. Add repackage in maven
 7. Add support to avoid StackExchange throttle
 8. Add support of different page size, different number of workers
