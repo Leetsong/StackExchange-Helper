@@ -41,7 +41,7 @@ public class FetcherConfig {
     synchronized public void store()
             throws FileNotFoundException, IOException {
         OutputStream outputStream = new FileOutputStream(mFileName);
-        mProperties.store(outputStream, "StackOverflow Fetcher configurations");
+        mProperties.store(outputStream, "StackExchange-Helper configurations");
     }
     
     public void reset() {
@@ -49,64 +49,66 @@ public class FetcherConfig {
             mProperties.clear();
             // set global
             mProperties.setProperty(property$Global_NrWorker(), Integer.toString(DEFAULT_NR_WORKER));
-            // set worker
-            for (int i = workerBegin(); i < workerEnd(); i += workerStep()) {
-                mProperties.setProperty(property$Worker_Id(i), Integer.toString(i));
-                mProperties.setProperty(property$Worker_Page(i), Integer.toString(i));
-                mProperties.setProperty(property$Worker_Step(i), Integer.toString(DEFAULT_NR_WORKER));
-                mProperties.setProperty(property$Worker_Appender_Type(i), CsvAppender.APPENDER_TYPE);
-                mProperties.setProperty(property$Worker_Appender_Path(i), String.format("worker[%d]_appender.csv", i));
+            // set ApiFetcher worker
+            for (int i = apiFetcherWorkerBegin(); i < apiFetcherWorkerEnd(); i += apiFetcherWorkerStep()) {
+                mProperties.setProperty(property$ApiFetcher_Worker_Id(i), Integer.toString(i));
+                mProperties.setProperty(property$ApiFetcher_Worker_Page(i), Integer.toString(i));
+                mProperties.setProperty(property$ApiFetcher_Worker_Step(i), Integer.toString(DEFAULT_NR_WORKER));
+                mProperties.setProperty(property$ApiFetcher_Worker_Appender_Type(i), CsvAppender.APPENDER_TYPE);
+                mProperties.setProperty(property$ApiFetcher_Worker_Appender_Path(i),
+                        String.format("apifetcher_worker[%d]_appender.csv", i));
             }
-            // set result
-            mProperties.setProperty(property$Result_NrPage(), Integer.toString(0));
-            mProperties.setProperty(property$Result_NrItem(), Integer.toString(0));
+            // set ApiFetcher result
+            mProperties.setProperty(property$ApiFetcher_Result_NrPage(), Integer.toString(0));
+            mProperties.setProperty(property$ApiFetcher_Result_NrItem(), Integer.toString(0));
             // set GooFetcher appender worker
-            mProperties.setProperty(property$GooFetcher_AppenderWorker_Appender_Path(), "goofetcher_worker_appender.csv");
             mProperties.setProperty(property$GooFetcher_AppenderWorker_Appender_Type(), CsvAppender.APPENDER_TYPE);
+            mProperties.setProperty(property$GooFetcher_AppenderWorker_Appender_Path(),
+                    "goofetcher_worker_appender.csv");
             // set GooFetcher result
             mProperties.setProperty(property$GooFetcher_Result_Start(), Integer.toString(0));
             mProperties.setProperty(property$GooFetcher_Result_PageSize(), Integer.toString(DEFAULT_PAGE_SIZE));
         }
     }
 
-    // workers should be iterated by workerBegin, workerStep and workerEnd
-    public int workerBegin() { return 1; }
+    // workers should be iterated by apiFetcherWorkerBegin, apiFetcherWorkerStep and apiFetcherWorkerEnd
+    public int apiFetcherWorkerBegin() { return 1; }
 
-    public int workerStep() { return 1; }
+    public int apiFetcherWorkerStep() { return 1; }
 
-    public int workerEnd() { return DEFAULT_NR_WORKER + 1; }
+    public int apiFetcherWorkerEnd() { return DEFAULT_NR_WORKER + 1; }
 
     // property getters
     public int getNrWorker() {
         return Integer.parseInt(mProperties.getProperty(property$Global_NrWorker()));
     }
 
-    public int getWorkerId(int i) {
-        return Integer.parseInt(mProperties.getProperty(property$Worker_Id(i)));
+    public int getApiFetcherWorkerId(int i) {
+        return Integer.parseInt(mProperties.getProperty(property$ApiFetcher_Worker_Id(i)));
     }
 
-    public int getWorkerPage(int id) {
-        return Integer.parseInt(mProperties.getProperty(property$Worker_Page(id)));
+    public int getApiFetcherWorkerPage(int id) {
+        return Integer.parseInt(mProperties.getProperty(property$ApiFetcher_Worker_Page(id)));
     }
 
-    public int getWorkerStep(int id) {
-        return Integer.parseInt(mProperties.getProperty(property$Worker_Step(id)));
+    public int getApiFetcherWorkerStep(int id) {
+        return Integer.parseInt(mProperties.getProperty(property$ApiFetcher_Worker_Step(id)));
     }
 
-    public String getWorkerAppenderPath(int id) {
-        return mProperties.getProperty(property$Worker_Appender_Path(id));
+    public String getApiFetcherWorkerAppenderPath(int id) {
+        return mProperties.getProperty(property$ApiFetcher_Worker_Appender_Path(id));
     }
 
-    public String getWorkerAppenderType(int id) {
-        return mProperties.getProperty(property$Worker_Appender_Type(id));
+    public String getApiFetcherWorkerAppenderType(int id) {
+        return mProperties.getProperty(property$ApiFetcher_Worker_Appender_Type(id));
     }
 
-    public int getResultNrPage() {
-        return Integer.parseInt(mProperties.getProperty(property$Result_NrPage()));
+    public int getApiFetcherResultNrPage() {
+        return Integer.parseInt(mProperties.getProperty(property$ApiFetcher_Result_NrPage()));
     }
 
-    public int getResultNrItem() {
-        return Integer.parseInt(mProperties.getProperty(property$Result_NrItem()));
+    public int getApiFetcherResultNrItem() {
+        return Integer.parseInt(mProperties.getProperty(property$ApiFetcher_Result_NrItem()));
     }
 
     public String getGooFetcherAppenderWorkerAppenderPath() {
@@ -136,45 +138,45 @@ public class FetcherConfig {
         }
     }
 
-    public void setWorkerId(int id) {
+    public void setApiFetcherWorkerId(int id) {
         synchronized (mProperties) {
-            mProperties.setProperty(property$Worker_Id(id), Integer.toString(id));
+            mProperties.setProperty(property$ApiFetcher_Worker_Id(id), Integer.toString(id));
         }
     }
 
-    public void setWorkerPage(int id, int page) {
+    public void setApiFetcherWorkerPage(int id, int page) {
         synchronized (mProperties) {
-            mProperties.setProperty(property$Worker_Page(id), Integer.toString(page));
+            mProperties.setProperty(property$ApiFetcher_Worker_Page(id), Integer.toString(page));
         }
     }
 
-    public void setWorkerStep(int id, int step) {
+    public void setApiFetcherWorkerStep(int id, int step) {
         synchronized (mProperties) {
-            mProperties.setProperty(property$Worker_Step(id), Integer.toString(step));
+            mProperties.setProperty(property$ApiFetcher_Worker_Step(id), Integer.toString(step));
         }
     }
 
-    public void setWorkerAppenderPath(int id, String name) {
+    public void setApiFetcherWorkerAppenderPath(int id, String name) {
         synchronized (mProperties) {
-            mProperties.setProperty(property$Worker_Appender_Path(id), name);
+            mProperties.setProperty(property$ApiFetcher_Worker_Appender_Path(id), name);
         }
     }
 
-    public void setWorkerAppenderType(int id, String type) {
+    public void setApiFetcherWorkerAppenderType(int id, String type) {
         synchronized (mProperties) {
-            mProperties.setProperty(property$Worker_Appender_Type(id), type);
+            mProperties.setProperty(property$ApiFetcher_Worker_Appender_Type(id), type);
         }
     }
 
-    public void setResultNrPage(int nrPage) {
+    public void setApiFetcherResultNrPage(int nrPage) {
         synchronized (mProperties) {
-            mProperties.setProperty(property$Result_NrPage(), Integer.toString(nrPage));
+            mProperties.setProperty(property$ApiFetcher_Result_NrPage(), Integer.toString(nrPage));
         }
     }
 
-    public void setResultNrItem(int nrItem) {
+    public void setApiFetcherResultNrItem(int nrItem) {
         synchronized (mProperties) {
-            mProperties.setProperty(property$Result_NrItem(), Integer.toString(nrItem));
+            mProperties.setProperty(property$ApiFetcher_Result_NrItem(), Integer.toString(nrItem));
         }
     }
 
@@ -211,32 +213,32 @@ public class FetcherConfig {
         return "global.nr_worker";
     }
 
-    private String property$Worker_Id(int id) {
-        return String.format("worker[%d].id", id);
+    private String property$ApiFetcher_Worker_Id(int id) {
+        return String.format("api_fetcher.worker[%d].id", id);
     }
 
-    private String property$Worker_Page(int id) {
-        return String.format("worker[%d].page", id);
+    private String property$ApiFetcher_Worker_Page(int id) {
+        return String.format("api_fetcher.worker[%d].page", id);
     }
 
-    private String property$Worker_Step(int id) {
-        return String.format("worker[%d].step", id);
+    private String property$ApiFetcher_Worker_Step(int id) {
+        return String.format("api_fetcher.worker[%d].step", id);
     }
 
-    private String property$Worker_Appender_Type(int id) {
-        return String.format("worker[%d].appender.type", id);
+    private String property$ApiFetcher_Worker_Appender_Type(int id) {
+        return String.format("api_fetcher.worker[%d].appender.type", id);
     }
 
-    private String property$Worker_Appender_Path(int id) {
-        return String.format("worker[%d].appender.path", id);
+    private String property$ApiFetcher_Worker_Appender_Path(int id) {
+        return String.format("api_fetcher.worker[%d].appender.path", id);
     }
 
-    private String property$Result_NrPage() {
-        return "result.nr_page";
+    private String property$ApiFetcher_Result_NrPage() {
+        return "api_fetcher.result.nr_page";
     }
 
-    private String property$Result_NrItem() {
-        return "result.nr_item";
+    private String property$ApiFetcher_Result_NrItem() {
+        return "api_fetcher.result.nr_item";
     }
 
     private String property$GooFetcher_AppenderWorker_Appender_Type() {

@@ -1,8 +1,6 @@
 package io.github.leetsong.seh;
 
 import io.github.leetsong.seh.data.stackexchange.GooGItem;
-import io.github.leetsong.seh.data.stackexchange.ItemContainer;
-import io.github.leetsong.seh.data.stackexchange.SynonymItem;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -10,7 +8,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import retrofit2.Response;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -23,12 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
-public class GooFetcher {
-
-    // initialize AppenderFactory
-    static {
-        AppenderFactory.initialize();
-    }
+public class GooFetcher extends SoupBasedFetcher {
 
     private Logger logger = LoggerFactory.getLogger(GooFetcher.class);
 
@@ -312,6 +304,7 @@ public class GooFetcher {
     public GooFetcher(String query, int total) {
         this.mQuery = query;
         this.mTotal = total;
+        this.mSynonyms = new String[0];
         this.mAppenderWorkerLock = new Object();
         this.mLinksQueue = new ArrayBlockingQueue<>(DEFAULT_QUEUE_CAPACITY);
         this.mGItemsQueue = new ArrayBlockingQueue<>(DEFAULT_QUEUE_CAPACITY);
@@ -322,13 +315,21 @@ public class GooFetcher {
                 new String[] { mQuery}));
     }
 
+    @Override
     public void fetch() {
         // This is the LooperWorker
 
-        tryRestart();
-        fillSynonyms();
+        // restart
+        if (tryRestart()) {
+            logger.info("GooFetcher restarted from last state");
+        } else {
+            logger.info("GooFetcher started from scratch");
+        }
 
-        // create the workers
+        // fill synonyms
+        mSynonyms = fillSynonyms();
+
+        // create the workers (and the pool)
         this.mProducerWorker = new ProducerWorker();
         this.mAppenderWorker = new AppenderWorker(mFetcherConfig.getGooFetcherAppenderWorkerAppenderPath());
         this.mConsumerWorkers = Executors.newFixedThreadPool(mNrConsumerWorker);
@@ -401,6 +402,7 @@ public class GooFetcher {
         }
     }
 
+    @Override
     protected String searchUrl() {
         String[] queries = new String[mSynonyms.length + 1];
         queries[0] = mQuery;
@@ -424,48 +426,20 @@ public class GooFetcher {
         try {
             // start according to the configuration files
             mFetcherConfig.load();
+            return true;
         } catch (FileNotFoundException e) {
             // do not need to restart, start from scratch
             mFetcherConfig.reset();
             return false;
         } catch (IOException e) {
             e.printStackTrace();
+            // errors happen, start from scratch
+            mFetcherConfig.reset();
             return false;
         } finally {
             mStart = mFetcherConfig.getGooFetcherResultStart();
             mPageSize = mFetcherConfig.getGooFetcherResultPageSize();
             mNrConsumerWorker = mFetcherConfig.getNrWorker();
-        }
-
-        return false;
-    }
-
-    private void fillSynonyms() {
-        StackOverflowClient client = StackOverflowClient.getClient();
-        StackOverflowService service = client.getStackOverflowService();
-
-        // only fetch 1 page, it is enough
-        try {
-            Response<ItemContainer<SynonymItem>> response = service.synonyms(1, new String[]{ mQuery}).execute();
-            if (response.isSuccessful()) {
-                ItemContainer<SynonymItem> result = response.body();
-                if (result != null) {
-                    List<SynonymItem> synonyms = result.getItems();
-                    if (synonyms != null && synonyms.size() != 0) {
-                        mSynonyms = new String[synonyms.size()];
-                        for (int i = 0; i < synonyms.size(); i ++) {
-                            mSynonyms[i] = synonyms.get(i).getFromTag();
-                        }
-                    }
-                } else {
-                    logger.error("Failed to get synonyms due to: no response body is presented");
-                }
-            } else {
-                logger.error("Failed to get synonyms due to: " + response.toString());
-            }
-        } catch (IOException e) {
-            logger.error("Failed to get synonyms due to:");
-            e.printStackTrace();
         }
     }
 

@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static io.github.leetsong.seh.data.stackexchange.CsvItem.CSV_ITEM_HEADER;
+
 public class CsvCombiner implements Combiner {
 
     private static Logger logger = LoggerFactory.getLogger(CsvCombiner.class);
@@ -44,7 +46,7 @@ public class CsvCombiner implements Combiner {
         // write to the combined file
         try (CSVWriter csvWriter = new CSVWriter(new FileWriter(mCombinedFile),
                 ',', '"', '\\', "\n")) {
-            csvWriter.writeNext(CsvAppender.CSV_HEADER);
+            csvWriter.writeNext(CSV_ITEM_HEADER);
             csvWriter.writeAll(combinedResults);
         } catch (IOException e) {
             logger.error("Error while writing to " + mCombinedFile);

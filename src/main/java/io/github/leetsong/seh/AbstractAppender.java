@@ -1,6 +1,8 @@
 package io.github.leetsong.seh;
 
-public abstract class AbstractAppender implements Appender {
+import io.github.leetsong.seh.data.stackexchange.AppendableItem;
+
+public abstract class AbstractAppender<T extends AppendableItem> implements Appender<T> {
 
     // path of the appender
     protected String mPath;

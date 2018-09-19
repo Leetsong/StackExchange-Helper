@@ -1,9 +1,10 @@
 package io.github.leetsong.seh;
 
-import io.github.leetsong.seh.data.stackexchange.ItemContainer;
-import io.github.leetsong.seh.data.stackexchange.SearchItem;
+import io.github.leetsong.seh.data.stackexchange.CsvItemable;
 
-public class StdAppender extends AbstractAppender {
+import java.util.List;
+
+public class StdAppender extends AbstractAppender<CsvItemable> {
 
     // type of this appender
     public static final String APPENDER_TYPE = "std";
@@ -13,8 +14,8 @@ public class StdAppender extends AbstractAppender {
     }
 
     @Override
-    public void append(ItemContainer<SearchItem> result) {
-        System.out.println(String.format("||std::%s||: %s", mPath, result.toString()));
+    public void append(List<CsvItemable> items) {
+        System.out.println(String.format("||std::%s||: %s", mPath, items.toString()));
     }
 
     @Override

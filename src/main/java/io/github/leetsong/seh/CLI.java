@@ -71,8 +71,8 @@ public class CLI {
         }
 
         switch (mCommand) {
-            case FetcherCmd.COMMAND:
-                new FetcherCmd(this).execute(mCommandArgs);
+            case FetchCmd.COMMAND:
+                new FetchCmd(this).execute(mCommandArgs);
                 break;
             case CombinerCmd.COMMAND:
                 new CombinerCmd(this).execute(mCommandArgs);
@@ -157,8 +157,8 @@ public class CLI {
 
     private void help(String cmd) {
         switch (cmd) {
-            case FetcherCmd.COMMAND:
-                new FetcherCmd(this).help();
+            case FetchCmd.COMMAND:
+                new FetchCmd(this).help();
                 break;
             case CombinerCmd.COMMAND:
                 new CombinerCmd(this).help();

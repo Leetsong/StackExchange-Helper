@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 import java.util.List;
 
-public class SearchItem implements Serializable {
+public class SearchItem implements CsvItemable {
 
     private class Owner implements Serializable {
         @SerializedName("reputation")
@@ -179,5 +179,18 @@ public class SearchItem implements Serializable {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    @Override
+    public CsvItem toCsvItem() {
+        return new CsvItem.Builder()
+                .withQuestionId(questionId)
+                .withTitle(title)
+                .withTags(tags)
+                .withScore(score)
+                .withViewCount(viewCount)
+                .withLink(link)
+                .withCreationDate(creationDate)
+                .build();
     }
 }

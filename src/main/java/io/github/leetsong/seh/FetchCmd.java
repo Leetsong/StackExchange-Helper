@@ -2,7 +2,7 @@ package io.github.leetsong.seh;
 
 import org.apache.commons.cli.*;
 
-public class FetcherCmd extends CLI.Cmd {
+public class FetchCmd extends CLI.Cmd {
 
     private static class CLI_OPTIONS {
         static final String  OPT_TAGS_SHORT = "t";
@@ -13,7 +13,7 @@ public class FetcherCmd extends CLI.Cmd {
 
     public static final String COMMAND = "fetch";
 
-    public FetcherCmd(CLI cli) {
+    public FetchCmd(CLI cli) {
         super(cli);
     }
 
@@ -25,7 +25,7 @@ public class FetcherCmd extends CLI.Cmd {
 
             if (cli.hasOption(CLI_OPTIONS.OPT_TAGS_SHORT)) {
                 String tags = cli.getOptionValue(CLI_OPTIONS.OPT_TAGS_SHORT);
-                new Fetcher(tags.split(";")).fetch();
+                new ApiFetcher(tags.split(";")).fetch();
             } else {
                 mCli.stderr("Missing required argument");
                 help();
